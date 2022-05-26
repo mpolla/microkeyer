@@ -10,7 +10,7 @@
 
 
 const int TONE_HZ = 600;
-const int WPM_SPEED = 15;
+const int WPM_SPEED = 20;
 const int CLEAR_MS = 2000; // Reset after 2 seconds
 
 // Arduino Pro Micro internal led
@@ -27,7 +27,6 @@ const int DIT_MS = int(1000.0 * 60 / (50 * WPM_SPEED));
 const int DA_MS = 3 * DIT_MS;
 const int LETTER_SPACE_MS = 3 * DIT_MS;
 const int WORD_SPACE_MS = 7 * DIT_MS;
-const int NEWLINE_DELAY_MS = 10000;
 const int DEBOUNCE_DELAY = DIT_MS;
 
 
@@ -137,7 +136,6 @@ void setup() {
 }
 
 int space = 0;
-int newline = 1;
 int previous = 0;
 
 // the loop function runs over and over again forever
@@ -148,11 +146,6 @@ void loop() {
    //Serial.print(" ");
    Keyboard.print(" ");
    space = 1;
-  }
-
-  if ((millis() - lastDebounceTime) > NEWLINE_DELAY_MS && newline == 0) {
-    Serial.println("");
-    newline = 1;
   }
 
 
@@ -168,16 +161,22 @@ void loop() {
   if (((millis() - lastDebounceTime) > LETTER_SPACE_MS) && buffer.length() > 0) {
     //Serial.print(morseDecode(String(buffer)));
     String decoded = morseDecode(String(buffer));
+    // Backspace
     if (decoded == "Error") {
       Keyboard.write(8);
       space = 1;  
+    }
+    // Return/newline
+    else if (decoded == "AA") {
+      Keyboard.println("");
+      space = 1;
     } else {
       Keyboard.print(morseDecode(String(buffer)));
       space = 0;
     }
     buffer = "";
     
-    newline = 0;
+
     lastDebounceTime = millis();
   }
   
