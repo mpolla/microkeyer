@@ -14,7 +14,7 @@ and computers.
 
 - Arduino Pro Micro (physical size 17,9 mm x 33 mm)
 - 4 x M3 brass threaded inserts
-- 4 x M3x16mm hex socket cap screws
+- 4 x M3 x 5 mm hex socket cap screws
 - 2 x 10 kΩ resistors
 - Piezo buzzer
 - 3,5 mm stereo jack (barrell shape, diameter 8 mm)
