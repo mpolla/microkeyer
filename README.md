@@ -4,7 +4,7 @@ Microkeyer is an Arduino Pro Micro based Morse code keyer. Use it
 transform any two-paddle Morse key into a USB input device for phones
 and computers.
 
-![Microkeyer](./microkeyer.jpg)
+![Microkeyer](https://github.com/mpolla/microkeyer/blob/master/microkeyer.jpg)
 
 ![Microkeyer in action](./microkeyer-field.jpg)
 
