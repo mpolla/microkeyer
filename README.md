@@ -10,7 +10,7 @@ and computers.
 
 ## Bill of materials
 
-![Bill of materials](./microkeyer-bom.jpg)
+![Bill of materials](./microkeyer-bom.jpeg)
 
 - Arduino Pro Micro (physical size 17.9 mm x 33 mm)
 - 4 x M3 brass threaded inserts
