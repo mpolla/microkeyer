@@ -1,27 +1,29 @@
 
 /**
- * Microkeyer - Morse paddle keyer using Arduino Pro Micro
+ * Microkeyer - Use your two paddle Morse key as a USB input device
+ * 
+ * https://github.com/mpolla/microkeyer/
  * 
  * Matti Pöllä <mpo@iki.fi> 2022
  */
 
-
 #include "Keyboard.h"
 
-
+// Beep frequency
 const int TONE_HZ = 600;
-const int WPM_SPEED = 20;
-const int CLEAR_MS = 2000; // Reset after 2 seconds
 
-// Arduino Pro Micro internal led
-const int LED = 17;
-// Piezo buzzer
+// Words per minute speed
+const int WPM_SPEED = 20;
+
+// Reset input buffer after 2 seconds of inactivity
+const int CLEAR_MS = 2000;
+
+// Pin for piezo buzzer
 const int BUZZER = 14;
 
 // Iambic paddle connected using a 3.5 mm stereo jack
 const int paddleLeft = 6;
 const int paddleRight = 7;
-
 
 const int DIT_MS = int(1000.0 * 60 / (50 * WPM_SPEED));
 const int DA_MS = 3 * DIT_MS;
@@ -32,7 +34,7 @@ const int DEBOUNCE_DELAY = DIT_MS;
 
 int paddleLeftState = 0;
 int paddleRightState = 0;
-unsigned long lastDebounceTime = 0;
+unsigned long lastInputMillis = 0;
 
 String buffer = "";
 
@@ -116,98 +118,87 @@ String morseDecode(String s) {
   if (s == "...-.") { return "SN"; }
   if (s == "...---...") { return "SOS"; }
 
-  return "x";
+  return "";
 }
 
 // the setup function runs once when you press reset or power the board
 void setup() {
-  
   Serial.begin(9600);
-
-  pinMode(LED, OUTPUT);
-  digitalWrite(LED, LOW);
-  
   Keyboard.begin();
   pinMode(paddleLeft, INPUT);
   pinMode(paddleRight, INPUT);
-  lastDebounceTime = millis();
-
-
+  lastInputMillis = millis();
 }
 
-int space = 0;
+// Should we append whitespace after completing the
+// current Morse code character
+bool appendSpace = true;
+
+// Was the previous input a dit/0 or a dah/1
 int previous = 0;
 
 // the loop function runs over and over again forever
 void loop() {
 
-  if ((millis() - lastDebounceTime) > WORD_SPACE_MS && buffer == "" && space == 0) {
+  if ((millis() - lastInputMillis) > WORD_SPACE_MS && buffer == "" && appendSpace == true) {
    buffer = "";
    //Serial.print(" ");
    Keyboard.print(" ");
-   space = 1;
+   appendSpace = false;
   }
 
-
-  if ((millis() - lastDebounceTime) > CLEAR_MS && buffer != "") {
+  if ((millis() - lastInputMillis) > CLEAR_MS && buffer != "") {
     buffer = "";
     //Serial.println("");
-    lastDebounceTime = millis();
+    lastInputMillis = millis();
   }
 
   paddleLeftState = digitalRead(paddleLeft);
   paddleRightState = digitalRead(paddleRight);  
   
-  if (((millis() - lastDebounceTime) > LETTER_SPACE_MS) && buffer.length() > 0) {
+  if (((millis() - lastInputMillis) > LETTER_SPACE_MS) && buffer.length() > 0) {
     //Serial.print(morseDecode(String(buffer)));
     String decoded = morseDecode(String(buffer));
-    // Backspace
+    // In case of error "dit-dit-dit-dit-dit-dit-dit-dit" use backspace
     if (decoded == "Error") {
       Keyboard.write(8);
-      space = 1;  
+      appendSpace = false;  
     }
     // Return/newline
     else if (decoded == "AA") {
       Keyboard.println("");
-      space = 1;
+      appendSpace = false;
     } else {
       Keyboard.print(morseDecode(String(buffer)));
-      space = 0;
+      appendSpace = true;
     }
     buffer = "";
-    
-
-    lastDebounceTime = millis();
+    lastInputMillis = millis();
   }
   
   // Are we ready for a new input?
-  if ((millis() - lastDebounceTime) > DEBOUNCE_DELAY) {
+  if ((millis() - lastInputMillis) > DEBOUNCE_DELAY) {
     // Left paddle
     if (paddleLeftState == LOW && paddleRightState == HIGH) {
       tone(BUZZER, TONE_HZ);
-      digitalWrite(LED, HIGH);
       delay(DIT_MS);
       noTone(BUZZER);
-      digitalWrite(LED, LOW); 
       buffer += ".";
-      lastDebounceTime = millis();
+      lastInputMillis = millis();
       previous = 0;
     }
     // Right paddle
     else if (paddleLeftState == HIGH && paddleRightState == LOW) {
       tone(BUZZER, TONE_HZ);
-      digitalWrite(LED, HIGH);
       delay(DA_MS);
       noTone(BUZZER);
-      digitalWrite(LED, LOW);
       buffer += "-";
-      lastDebounceTime = millis();
+      lastInputMillis = millis();
       previous = 1;
     }
     // Both paddles
     else if (paddleLeftState == LOW && paddleRightState == LOW) {
       tone(BUZZER, TONE_HZ);
-      digitalWrite(LED, HIGH);
       if (previous == 0) {
         delay(DA_MS);
         previous = 1;
@@ -218,9 +209,7 @@ void loop() {
         buffer += ".";
       }
       noTone(BUZZER);
-      digitalWrite(LED, LOW);
-      lastDebounceTime = millis();
+      lastInputMillis = millis();
     }
-    
   }
 }
