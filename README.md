@@ -1,7 +1,7 @@
 # OH2CME Microkeyer
 
-Microkeyer is an Arduino Pro Micro based [Morse code](https://en.wikipedia.org/wiki/Morse_code) keyer. Use it
-transform any iambic paddle key into a USB input device for phones
+Microkeyer is an pocket sized [Morse code](https://en.wikipedia.org/wiki/Morse_code) keyer based on 
+the Arduino Pro Micro board. Use it to transform any iambic paddle key into a USB input device for phones
 and computers.
 
 ![Microkeyer](microkeyer.jpeg)
