@@ -64,7 +64,7 @@ String morseDecode(String s) {
   if (s == "..-") { return "U"; }
   if (s == "...-") { return "V"; }
   if (s == ".--") { return "W"; }
-  if (s == ".--.") { return "X"; }
+  if (s == "-..-") { return "X"; }
   if (s == "-.--") { return "Y"; }
   if (s == "--..") { return "Z"; }
 
