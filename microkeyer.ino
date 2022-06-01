@@ -121,7 +121,6 @@ String morseDecode(String s) {
   return "";
 }
 
-// the setup function runs once when you press reset or power the board
 void setup() {
   Serial.begin(9600);
   Keyboard.begin();
